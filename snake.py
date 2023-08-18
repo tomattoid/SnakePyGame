@@ -5,7 +5,7 @@ from config import *
 class SnakeElement(pygame.sprite.Sprite):
     def __init__(self, coordinates, speed_x=0, speed_y=0, color=WHITE):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((WIDTH/20 - 5, WIDTH/20 - 5))
+        self.image = pygame.Surface((WIDTH/20 - 5, HEIGHT/20 - 5))
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = (coordinates[0], coordinates[1])
@@ -37,3 +37,7 @@ class Snake:
             for element_idx in range(len(self.elements) - 1, 0, -1):
                 self.elements[element_idx].speed_x = self.elements[element_idx - 1].speed_x
                 self.elements[element_idx].speed_y = self.elements[element_idx - 1].speed_y
+    
+    def get_next_pos(self):
+        return (self.elements[0].rect.centerx + self.get_direction(0)[0], 
+                self.elements[0].rect.centery + self.get_direction(0)[1])
