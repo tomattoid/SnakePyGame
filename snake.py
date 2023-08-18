@@ -1,6 +1,6 @@
-from typing import Any
 import pygame
-from config import *
+from config import WIDTH, HEIGHT, WHITE, GREY
+
 
 class SnakeElement(pygame.sprite.Sprite):
     def __init__(self, coordinates, speed_x=0, speed_y=0, color=WHITE):
@@ -11,33 +11,37 @@ class SnakeElement(pygame.sprite.Sprite):
         self.rect.center = (coordinates[0], coordinates[1])
         self.speed_x = speed_x
         self.speed_y = speed_y
-    
+
     def update(self):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
+
 class Snake:
     def __init__(self):
-        self.elements = []
-        self.elements.append(SnakeElement((30, 10), speed_x=20, color=GREY))
+        self.parts = []
+        self.parts.append(SnakeElement((30, 10), speed_x=20, color=GREY))
         self.add_element()
-    
+
     def get_direction(self, idx):
-        return (self.elements[idx].speed_x, self.elements[idx].speed_y)
-    
+        return (self.parts[idx].speed_x, self.parts[idx].speed_y)
+
     def get_coordinates(self, idx):
-        return self.elements[idx].rect.center
-    
+        return self.parts[idx].rect.center
+
     def add_element(self):
-        coordinates = (self.get_coordinates(-1)[0] - self.get_direction(-1)[0], self.get_coordinates(-1)[1] - self.get_direction(-1)[1])
-        self.elements.append(SnakeElement(coordinates, self.get_direction(-1)[0], self.get_direction(-1)[1]))
-    
+        coordinates = (self.get_coordinates(-1)[0] - self.get_direction(-1)[0],
+                       self.get_coordinates(-1)[1] - self.get_direction(-1)[1])
+        self.parts.append(SnakeElement(coordinates,
+                                       self.get_direction(-1)[0],
+                                       self.get_direction(-1)[1]))
+
     def update_speed(self):
-        if len(self.elements) > 1:
-            for element_idx in range(len(self.elements) - 1, 0, -1):
-                self.elements[element_idx].speed_x = self.elements[element_idx - 1].speed_x
-                self.elements[element_idx].speed_y = self.elements[element_idx - 1].speed_y
-    
+        if len(self.parts) > 1:
+            for idx in range(len(self.parts) - 1, 0, -1):
+                self.parts[idx].speed_x = self.parts[idx - 1].speed_x
+                self.parts[idx].speed_y = self.parts[idx - 1].speed_y
+
     def get_next_pos(self):
-        return (self.elements[0].rect.centerx + self.get_direction(0)[0], 
-                self.elements[0].rect.centery + self.get_direction(0)[1])
+        return (self.parts[0].rect.centerx + self.get_direction(0)[0],
+                self.parts[0].rect.centery + self.get_direction(0)[1])

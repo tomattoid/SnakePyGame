@@ -5,6 +5,7 @@ img_folder = os.path.join(game_folder, 'img')
 game_over_img = os.path.join(img_folder, 'gameover.png')
 restart_img = os.path.join(img_folder, 'restart.png')
 quit_img = os.path.join(img_folder, 'quit.png')
+you_win_img = os.path.join(img_folder, 'you_win.png')
 
 WIDTH = 480
 HEIGHT = WIDTH
