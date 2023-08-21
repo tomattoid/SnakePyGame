@@ -1,7 +1,15 @@
 import pygame
-from config import (WIDTH, HEIGHT, game_over_img,
+from config import (WIDTH, HEIGHT, start_img, game_over_img,
                     quit_img, restart_img, WHITE, you_win_img)
 
+class Start(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(start_img)
+        self.image = pygame.transform.scale(self.image,(WIDTH / 1.5, HEIGHT / 2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH/2, HEIGHT/2)
+        
 
 class GameOver(pygame.sprite.Sprite):
     def __init__(self):
