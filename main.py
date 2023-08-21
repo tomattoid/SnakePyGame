@@ -62,9 +62,6 @@ while running:
     clock.tick(FPS)
     ev = pygame.event.get()
     if not game_over and not you_win:
-        coordinates.clear()
-        for element in player.parts:
-            coordinates.append(element.rect.center)
         for event in ev:
 
             if event.type == pygame.QUIT:
@@ -76,6 +73,9 @@ while running:
             if event.type == snake_move_event:
                 pygame.time.set_timer(snake_move_event, 150)
                 all_sprites.update()
+                coordinates.clear()
+                for idx in range(1, len(player.parts)):
+                    coordinates.append(player.parts[idx].rect.center)
                 player.update_speed()
                 if (player.get_coordinates(0)[0] == apple.rect.centerx and
                    player.get_coordinates(0)[1] == apple.rect.centery):
@@ -90,7 +90,7 @@ while running:
                             apple = Apple()
                         all_sprites.add(apple)
                         eat = False
-                if (player.get_coordinates(0)[0] in coordinates or
+                if (player.get_coordinates(0) in coordinates or
                    player.get_coordinates(0)[0] <= 0 or
                    player.get_coordinates(0)[1] <= 0 or
                    player.get_coordinates(0)[0] >= WIDTH or
