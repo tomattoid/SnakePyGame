@@ -1,10 +1,12 @@
 import runpy
 import pygame
-from pygame.locals import *
+from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK
 from snake import Snake
 from apple import Apple
-from ui import Quit, Restart, Win, GameOver, Start
+from ui import Win, GameOver, Start
+from sound import SoundPlayer
+
 
 def wait():
     start_sprites = pygame.sprite.Group()
@@ -20,23 +22,24 @@ def wait():
         start_sprites.draw(screen)
         pygame.display.flip()
 
+
 def check_movement(player: Snake, event: pygame.event.Event):
-    if (event.key == pygame.K_a and not
+    if ((event.key == pygame.K_a or event.key == pygame.K_LEFT) and not
         (player.get_coordinates(0)[0] - 20 == player.get_coordinates(1)[0] and
          player.get_coordinates(0)[1] == player.get_coordinates(1)[1])):
         player.parts[0].speed_x = -20
         player.parts[0].speed_y = 0
-    if (event.key == pygame.K_d and not
+    if ((event.key == pygame.K_d or event.key == pygame.K_RIGHT) and not
         (player.get_coordinates(0)[0] + 20 == player.get_coordinates(1)[0] and
          player.get_coordinates(0)[1] == player.get_coordinates(1)[1])):
         player.parts[0].speed_x = 20
         player.parts[0].speed_y = 0
-    if (event.key == pygame.K_w and not
+    if ((event.key == pygame.K_w or event.key == pygame.K_UP) and not
         (player.get_coordinates(0)[1] - 20 == player.get_coordinates(1)[1] and
          player.get_coordinates(0)[0] == player.get_coordinates(1)[0])):
         player.parts[0].speed_y = -20
         player.parts[0].speed_x = 0
-    if (event.key == pygame.K_s and not
+    if ((event.key == pygame.K_s or event.key == pygame.K_DOWN) and not
         (player.get_coordinates(0)[1] + 20 == player.get_coordinates(1)[1] and
          player.get_coordinates(0)[0] == player.get_coordinates(1)[0])):
         player.parts[0].speed_y = 20
@@ -48,6 +51,7 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake")
 clock = pygame.time.Clock()
+sound_player = SoundPlayer()
 all_sprites = pygame.sprite.Group()
 start_sprites = pygame.sprite.Group()
 lose_sprites = pygame.sprite.Group()
@@ -78,7 +82,8 @@ wait()
 while running:
     clock.tick(FPS)
     ev = pygame.event.get()
-
+    if not pygame.mixer.music.get_busy() and not game_over and not you_win:
+        sound_player.play_music()
     if not game_over and not you_win:
         for event in ev:
 
@@ -102,18 +107,22 @@ while running:
                     all_sprites.add(player.parts[-1])
                     if len(player.parts) == (WIDTH/20) ** 2:
                         you_win = True
+                        sound_player.play_victory_snd()
                     else:
                         apple = Apple()
                         while apple.rect.center in coordinates:
                             apple = Apple()
                         all_sprites.add(apple)
                         eat = False
+                        sound_player.play_collect_snd()
                 if (player.get_coordinates(0) in coordinates or
                    player.get_coordinates(0)[0] <= 0 or
                    player.get_coordinates(0)[1] <= 0 or
                    player.get_coordinates(0)[0] >= WIDTH or
                    player.get_coordinates(0)[1] >= HEIGHT):
-                    game_over = True 
+                    game_over = True
+                    sound_player.play_lose_snd()
+                    sound_player.stop_music()
 
         screen.fill(BLACK)
         all_sprites.draw(screen)
@@ -122,9 +131,9 @@ while running:
         for event in ev:
             if event.type == pygame.QUIT:
                 running = False
-            if (event.type == KEYDOWN and event.key == K_q):
+            if (event.type == KEYDOWN and event.key == pygame.K_q):
                 running = False
-            if (event.type == KEYDOWN and event.key == K_r):
+            if (event.type == KEYDOWN and event.key == pygame.K_r):
                 runpy.run_path(path_name='main.py')
                 running = False
         screen.fill(BLACK)
