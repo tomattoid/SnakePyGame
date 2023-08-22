@@ -8,6 +8,7 @@ restart_img = os.path.join(img_folder, 'restart.png')
 quit_img = os.path.join(img_folder, 'quit.png')
 you_win_img = os.path.join(img_folder, 'you_win.png')
 start_img = os.path.join(img_folder, 'start.png')
+pause_img = os.path.join(img_folder, 'pause.png')
 
 snd_folder = os.path.join(game_folder, 'snd')
 music1 = os.path.join(snd_folder, 'music1.wav')

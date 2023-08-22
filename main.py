@@ -4,7 +4,7 @@ from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK
 from snake import Snake
 from apple import Apple
-from ui import Win, GameOver, Start
+from ui import Win, GameOver, Start, Pause
 from sound import SoundPlayer
 
 
@@ -56,8 +56,10 @@ all_sprites = pygame.sprite.Group()
 start_sprites = pygame.sprite.Group()
 lose_sprites = pygame.sprite.Group()
 win_sprite = pygame.sprite.Group()
+pause_sprite = pygame.sprite.Group()
 player = Snake()
 apple = Apple()
+pause_img = Pause()
 you_win_sprite = Win()
 all_sprites.add(player.parts[0])
 all_sprites.add(player.parts[1])
@@ -69,12 +71,14 @@ all_sprites.add(apple)
 game_over_sprite = GameOver()
 lose_sprites.add([game_over_sprite])
 win_sprite.add(you_win_sprite)
+pause_sprite.add(pause_img)
 snake_move_event = pygame.USEREVENT + 1
 pygame.time.set_timer(snake_move_event, 150)
 running = True
 eat = False
 game_over = False
 you_win = False
+pause = False
 coordinates = []
 
 wait()
@@ -84,13 +88,16 @@ while running:
     ev = pygame.event.get()
     if not pygame.mixer.music.get_busy() and not game_over and not you_win:
         sound_player.play_music()
-    if not game_over and not you_win:
+    if not game_over and not you_win and not pause:
         for event in ev:
 
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = True
+                    sound_player.set_music_volume(0.1)
                 check_movement(player, event)
 
             if event.type == snake_move_event:
@@ -147,6 +154,23 @@ while running:
                 running = False
         screen.fill(BLACK)
         win_sprite.draw(screen)
+
+    elif pause:
+        for event in ev:
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    running = False
+                if event.key == pygame.K_r:
+                    runpy.run_path(path_name='main.py')
+                    running = False
+                if event.key == pygame.K_ESCAPE:
+                    pause = False
+                    sound_player.set_music_volume(1)
+        screen.fill(BLACK)
+        pause_sprite.draw(screen)
+
     pygame.display.flip()
 
 pygame.quit()
