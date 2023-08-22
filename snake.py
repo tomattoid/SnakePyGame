@@ -26,12 +26,12 @@ class Snake:
     def get_direction(self, idx):
         return (self.parts[idx].speed_x, self.parts[idx].speed_y)
 
-    def get_coordinates(self, idx):
+    def get_xy(self, idx):
         return self.parts[idx].rect.center
 
     def add_element(self):
-        coordinates = (self.get_coordinates(-1)[0] - self.get_direction(-1)[0],
-                       self.get_coordinates(-1)[1] - self.get_direction(-1)[1])
+        coordinates = (self.get_xy(-1)[0] - self.get_direction(-1)[0],
+                       self.get_xy(-1)[1] - self.get_direction(-1)[1])
         self.parts.append(SnakeElement(coordinates,
                                        self.get_direction(-1)[0],
                                        self.get_direction(-1)[1]))

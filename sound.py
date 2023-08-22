@@ -39,3 +39,6 @@ class SoundPlayer:
 
     def set_music_volume(self, volume):
         pygame.mixer.music.set_volume(volume)
+
+    def set_end_event(self, end_event):
+        pygame.mixer.music.set_endevent(end_event)

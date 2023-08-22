@@ -23,6 +23,7 @@ victory_snd = os.path.join(snd_folder, 'victory.wav')
 WIDTH = 480
 HEIGHT = WIDTH
 FPS = 60
+GAME_SPEED = 150
 WHITE = (235, 219, 178)
 GREY = (146, 131, 116)
 BLACK = (28, 28, 28)
