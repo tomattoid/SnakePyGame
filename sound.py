@@ -14,6 +14,7 @@ class SoundPlayer:
         self.lose = pygame.mixer.Sound(lose_snd)
         self.collect = pygame.mixer.Sound(collect_snd)
         self.victory = pygame.mixer.Sound(victory_snd)
+        self.set_music_volume(0.4)
 
     def play_lose_snd(self):
         self.lose.play()

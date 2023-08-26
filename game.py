@@ -4,7 +4,8 @@ from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK, GAME_SPEED
 from snake import Snake
 from apple import Apple
-from ui import Win, GameOver, Start, Pause
+from ui import (Win, GameOver, Start, Pause, Menu, Play,
+                Leaderboard, Settings, Quit)
 from sound import SoundPlayer
 
 
@@ -23,12 +24,18 @@ class Game():
         self.game_over = GameOver()
         self.you_win = Win()
         self.start = Start()
+        self.menu = Menu()
+        self.play = Play()
+        self.leaderboard = Leaderboard()
+        self.settings = Settings()
+        self.quit = Quit()
 
         self.game_sprites = pygame.sprite.Group()
         self.start_sprites = pygame.sprite.Group()
         self.lose_sprites = pygame.sprite.Group()
         self.win_sprite = pygame.sprite.Group()
         self.pause_sprite = pygame.sprite.Group()
+        self.main_menu_sprites = pygame.sprite.Group()
 
         self.game_sprites.add([self.player.parts[0], self.player.parts[1],
                                self.apple])
@@ -36,25 +43,54 @@ class Game():
         self.win_sprite.add(self.you_win)
         self.pause_sprite.add(self.pause)
         self.start_sprites.add(self.start)
+        self.main_menu_list = [self.menu, self.play,
+                               self.leaderboard, self.settings,
+                               self.quit]
+        self.main_menu_sprites.add(self.main_menu_list)
 
         self.MUSIC_END = pygame.USEREVENT + 1
         self.SNAKE_MOVE = pygame.USEREVENT + 2
+        self.MENU_ITEM_BLINK = pygame.USEREVENT + 3
 
         self.sound_player.set_end_event(self.MUSIC_END)
-        self.wait()
+        self.main_menu()
 
-    def wait(self):
+    def init_game(self):
+        self.game_sprites.remove(self.player.parts)
+        self.game_sprites.remove(self.apple)
+        self.player = Snake()
+        self.apple = Apple()
+        self.game_sprites.add([self.player.parts[0],
+                              self.player.parts[1],
+                              self.apple])
+
+    def main_menu(self):
         loop = True
+        selected = 0
+        pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED*5)
         while loop:
             self.clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
-                    loop = False
-
+                    if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                        self.main_menu_list[selected + 1].image.set_alpha(255)
+                        selected = (selected + 1) % 4
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:
+                        self.main_menu_list[selected + 1].image.set_alpha(255)
+                        selected = (selected - 1) % 4
+                    if event.key == pygame.K_RETURN:
+                        if selected == 0:
+                            loop = False
+                        if selected == 3:
+                            pygame.quit()
+                if event.type == self.MENU_ITEM_BLINK:
+                    self.main_menu_list[selected + 1].update()
+                    pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED*5)
+                if event.type == pygame.QUIT:
+                    pygame.quit()
             self.screen.fill(BLACK)
-            self.start_sprites.draw(self.screen)
+            self.main_menu_sprites.draw(self.screen)
             pygame.display.flip()
-        self.sound_player.play_music()
         self.play_game()
 
     def check_movement(self, event: pygame.event.Event):
@@ -115,6 +151,7 @@ class Game():
     def pause_game(self):
         loop = True
         ev = pygame.event.get()
+        self.sound_player.set_music_volume(0.1)
         while loop:
             ev = pygame.event.get()
             self.clock.tick(FPS)
@@ -122,23 +159,27 @@ class Game():
                 if event.type == self.MUSIC_END:
                     self.sound_player.play_music()
                 if event.type == pygame.QUIT:
-                    loop = False
+                    pygame.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         pygame.quit()
                     if event.key == pygame.K_r:
-                        runpy.run_path(path_name='main.py')
+                        self.init_game()
                         loop = False
+                        self.play_game()
+                    if event.key == pygame.K_m:
+                        self.init_game()
+                        loop = False
+                        self.main_menu()
                     if event.key == pygame.K_ESCAPE:
                         loop = False
-                        self.sound_player.set_music_volume(1)
+                        self.play_game()
                 self.screen.fill(BLACK)
                 self.pause_sprite.draw(self.screen)
                 pygame.display.flip()
-        self.play_game()
 
     def win(self):
-        self.sound_player.play_lose_snd()
+        self.sound_player.play_victory_snd()
         self.sound_player.stop_music()
         loop = True
 
@@ -157,13 +198,15 @@ class Game():
     def play_game(self):
         loop = True
         coords = []
+        self.sound_player.set_music_volume(0.4)
         pygame.time.set_timer(self.SNAKE_MOVE, GAME_SPEED)
         while loop:
             self.clock.tick(FPS)
             ev = pygame.event.get()
             if loop:
                 for event in ev:
-                    if event.type == self.MUSIC_END:
+                    if (event.type == self.MUSIC_END or
+                       not pygame.mixer.music.get_busy()):
                         self.sound_player.play_music()
 
                     if event.type == pygame.QUIT:
@@ -173,7 +216,6 @@ class Game():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             loop = False
-                            self.sound_player.set_music_volume(0.1)
                             self.pause_game()
                         self.check_movement(event)
 
