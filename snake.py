@@ -1,3 +1,4 @@
+import json
 import pygame
 from config import WIDTH, HEIGHT, WHITE, GREY
 
@@ -16,6 +17,12 @@ class SnakeElement(pygame.sprite.Sprite):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
+    def to_dict(self):
+        return {
+            "coordinates": (self.rect.centerx, self.rect.centery),
+            "speed_x": self.speed_x,
+            "speed_y": self.speed_y
+        }
 
 class Snake:
     def __init__(self):
@@ -45,3 +52,8 @@ class Snake:
     def get_next_pos(self):
         return (self.parts[0].rect.centerx + self.get_direction(0)[0],
                 self.parts[0].rect.centery + self.get_direction(0)[1])
+
+    def to_dict(self):
+        return {
+            "parts": [part.to_dict() for part in self.parts]
+        }

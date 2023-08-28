@@ -1,8 +1,10 @@
 import runpy
 import pygame
 import requests
+import socket
+import json
 from pygame.locals import KEYDOWN
-from config import WIDTH, HEIGHT, FPS, BLACK, GAME_SPEED, SERVER_URL
+from config import WIDTH, HEIGHT, FPS, BLACK, RED, GAME_SPEED, SERVER_URL
 from snake import Snake
 from apple import Apple
 from ui import (Win, GameOver, Start, Pause, Menu, Play,
@@ -14,6 +16,7 @@ class Game():
     def __init__(self) -> None:
         pygame.init()
         pygame.mixer.init()
+        pygame.font.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         pygame.display.set_caption("Snake")
@@ -68,7 +71,7 @@ class Game():
     def main_menu(self):
         loop = True
         selected = 0
-        pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED*5)
+        pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED)
         while loop:
             self.clock.tick(FPS)
             for event in pygame.event.get():
@@ -82,11 +85,52 @@ class Game():
                     if event.key == pygame.K_RETURN:
                         if selected == 0:
                             loop = False
+                        if selected == 1:
+                            loop = False
+
+                            self.screen.fill(BLACK)
+                            f1 = pygame.font.Font('./fonts/retro.ttf', 20)
+                            text1 = f1.render('LEADERBOARD', True,
+                                            (RED))
+                            place = text1.get_rect(center=(HEIGHT/2, WIDTH/8))
+                            self.screen.blit(text1, place)
+
+                            # response /leaderboard
+                            try:
+                                response = requests.get(SERVER_URL + '/leaderboard')
+                                leaders = response.text
+                                f2 = pygame.font.Font('./fonts/retro.ttf', 10)
+                                top = 7
+     
+                                text_player = f2.render(leaders[0], True, (RED))
+                                place = text_player.get_rect(center=(HEIGHT/2, WIDTH/top))
+                                self.screen.blit(text_player, place)
+                                print(leaders[1])
+
+                               # for player in leaders:
+                                    #text_player = f2.render(player, True, (RED))
+                                    #place = text_player.get_rect(center=(HEIGHT/2, WIDTH/top))
+                                    #self.screen.blit(text_player, place)
+
+                                    #if top > 1:
+                                        #top -= 1
+                                    #else:
+                                        #break
+                            except:
+                                print('connection error')
+
+                            pygame.display.update()
+
+                            while True:
+                                for event in pygame.event.get():
+                                    if event.type == KEYDOWN:
+                                        self.main_menu()
+                            
                         if selected == 3:
                             pygame.quit()
                 if event.type == self.MENU_ITEM_BLINK:
                     self.main_menu_list[selected + 1].update()
-                    pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED*5)
+                    pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED)
                 if event.type == pygame.QUIT:
                     pygame.quit()
             self.screen.fill(BLACK)
@@ -131,6 +175,9 @@ class Game():
             self.sound_player.play_collect_snd()
 
     def lose(self):
+        # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
         self.sound_player.play_lose_snd()
         self.sound_player.stop_music()
 
@@ -139,9 +186,13 @@ class Game():
             'score': len(self.player.parts)
         }
 
-        response = requests.post(SERVER_URL + '/player', json=data)
-        print(response.text)
+        try:
+            response = requests.post(SERVER_URL + '/player', json=data)
+            print(response.text)
+        except:
+            print('connection error')
 
+        # sock.close()
         loop = True
         while loop:
             ev = pygame.event.get()
@@ -206,11 +257,25 @@ class Game():
             pygame.display.flip()
 
     def play_game(self):
+        # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+        # try:
+            # sock.connect(('localhost', 5000))
+            # sock.send('player1 start play'.encode())
+        # except:
+            # pass
+
         loop = True
         coords = []
         self.sound_player.set_music_volume(0.4)
         pygame.time.set_timer(self.SNAKE_MOVE, GAME_SPEED)
         while loop:
+            # sock.send(json.dumps(self.player.to_dict()).encode())
+            # data = sock.recv(1024)
+            # data = data.decode()
+            # print(data)
+
             self.clock.tick(FPS)
             ev = pygame.event.get()
             if loop:

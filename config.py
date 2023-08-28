@@ -36,4 +36,4 @@ RED = (251, 74, 68)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-SERVER_URL = 'https://antik88.pythonanywhere.com'
+SERVER_URL = 'https://localhost:5000'
