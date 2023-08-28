@@ -1,7 +1,7 @@
 import pygame
 from enum_ceate import MenuItem, FontSize
 import leaderboard
-import user_imput
+import user_input
 from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK, GAME_SPEED
 from config import RED
@@ -62,7 +62,7 @@ class Game():
         self.MENU_ITEM_BLINK = pygame.USEREVENT + 3
 
         self.sound_player.set_end_event(self.MUSIC_END)
-        self.user_name = user_imput.enter_user_name(self)
+        self.user_name = user_input.enter_user_name(self)
         self.main_menu()
 
     def init_game(self):
@@ -93,7 +93,7 @@ class Game():
                         if selected == MenuItem.LEADERBOARD:
                             leaderboard.show_leaderboard(self)
                         if selected == MenuItem.SETTINGS:
-                            user_imput.enter_user_name(self)
+                            user_input.enter_user_name(self)
                         if selected == MenuItem.QUIT:
                             pygame.quit()
                 if event.type == self.MENU_ITEM_BLINK:
