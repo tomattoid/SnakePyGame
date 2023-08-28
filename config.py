@@ -32,8 +32,8 @@ GAME_SPEED = 150
 WHITE = (235, 219, 178)
 GREY = (146, 131, 116)
 BLACK = (28, 28, 28)
-RED = (251, 74, 68)
+RED = (251, 73, 52)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-SERVER_URL = 'https://localhost:5000'
+SERVER_URL = 'http://Antik88.pythonanywhere.com'
