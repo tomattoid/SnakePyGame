@@ -1,15 +1,15 @@
 import pygame
 from enum_ceate import MenuItem, FontSize
-import leaderboard
+from leaderboard import Leaderboard
+from server_req import ServerReq
 import user_input
 from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK, GAME_SPEED
 from config import RED
-import server_req
 from snake import Snake
 from apple import Apple
 from ui import (Win, GameOver, Start, Pause, Menu, Play,
-                Leaderboard, Settings, Quit)
+                Leaderboard_ui, Settings, Quit)
 from sound import SoundPlayer
 
 
@@ -31,17 +31,16 @@ class Game():
         self.start = Start()
         self.menu = Menu()
         self.play = Play()
-        self.leaderboard = Leaderboard()
+        self.leaderboard_ui = Leaderboard_ui()
         self.settings = Settings()
         self.quit = Quit()
-
         self.game_sprites = pygame.sprite.Group()
         self.start_sprites = pygame.sprite.Group()
         self.lose_sprites = pygame.sprite.Group()
         self.win_sprite = pygame.sprite.Group()
         self.pause_sprite = pygame.sprite.Group()
         self.main_menu_sprites = pygame.sprite.Group()
-
+        self.leaders = Leaderboard(self.screen)
         self.game_sprites.add([self.player.parts[0], self.player.parts[1],
                                self.apple])
         self.lose_sprites.add(self.game_over)
@@ -49,7 +48,7 @@ class Game():
         self.pause_sprite.add(self.pause)
         self.start_sprites.add(self.start)
         self.main_menu_list = [self.menu, self.play,
-                               self.leaderboard, self.settings,
+                               self.leaderboard_ui, self.settings,
                                self.quit]
         self.main_menu_sprites.add(self.main_menu_list)
 
@@ -90,12 +89,15 @@ class Game():
                         selected = (selected - 1) % 4
                     if event.key == pygame.K_RETURN:
                         loop = False
+                        if selected == MenuItem.PLAY:
+                            self.play_game()
                         if selected == MenuItem.LEADERBOARD:
-                            leaderboard.show_leaderboard(self)
+                            self.leaders.show()
                         if selected == MenuItem.SETTINGS:
-                            user_input.enter_user_name(self)
+                            print('settings')
                         if selected == MenuItem.QUIT:
                             pygame.quit()
+                        loop = True
                 if event.type == self.MENU_ITEM_BLINK:
                     self.main_menu_list[selected + 1].update()
                     pygame.time.set_timer(self.MENU_ITEM_BLINK, GAME_SPEED)
@@ -104,7 +106,6 @@ class Game():
             self.screen.fill(BLACK)
             self.main_menu_sprites.draw(self.screen)
             pygame.display.flip()
-        self.play_game()
 
     def check_movement(self, event: pygame.event.Event):
         if ((event.key == pygame.K_a or event.key == pygame.K_LEFT) and not
@@ -146,7 +147,8 @@ class Game():
         self.sound_player.play_lose_snd()
         self.sound_player.stop_music()
 
-        server_req.add_to_leaderboard(self)
+        self.server_req = ServerReq(self.user_name, len(self.player.parts))
+        self.server_req.add_to_leaderboard()
 
         loop = True
         while loop:
@@ -155,12 +157,14 @@ class Game():
             for event in ev:
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                if (event.type == KEYDOWN and event.key == pygame.K_q):
-                    pygame.quit()
-                if (event.type == KEYDOWN and event.key == pygame.K_r):
-                    # runpy.run_path(path_name='main.py')
-                    self.main_menu()
-                    loop = False
+                    return
+                if event.type == KEYDOWN:
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        return
+                    if event.key == pygame.K_r:
+                        self.main_menu()
+                        loop = False
 
             self.screen.fill(BLACK)
             self.lose_sprites.draw(self.screen)
@@ -174,8 +178,9 @@ class Game():
 
     def pause_game(self):
         paused = True
-        dim_surface = pygame.Surface(self.screen.get_size()).convert_alpha()
-        dim_surface.fill(BLACK)  # Чёрный цвет с непрозрачностью 128
+        self.sound_player.set_music_volume(0.1)
+        self.screen.fill(BLACK)
+        self.pause_sprite.draw(self.screen)
         while paused:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -183,38 +188,14 @@ class Game():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         paused = False
-            self.screen.blit(dim_surface, (0, 0))
+                    if event.key == pygame.K_q:
+                        return False
+                    if event.key == pygame.K_r:
+                        paused = False
+                        self.play_game()
             pygame.display.flip()
+        self.sound_player.set_music_volume(0.4)
         return True
-    # def pause_game(self):
-    #     loop = True
-    #     ev = pygame.event.get()
-    #     self.sound_player.set_music_volume(0.1)
-    #     while loop:
-    #         ev = pygame.event.get()
-    #         self.clock.tick(FPS)
-    #         for event in ev:
-    #             if event.type == self.MUSIC_END:
-    #                 self.sound_player.play_music()
-    #             if event.type == pygame.QUIT:
-    #                 pygame.quit()
-    #             if event.type == pygame.KEYDOWN:
-    #                 if event.key == pygame.K_q:
-    #                     pygame.quit()
-    #                 if event.key == pygame.K_r:
-    #                     self.init_game()
-    #                     loop = False
-    #                     self.play_game()
-    #                 if event.key == pygame.K_m:
-    #                     self.init_game()
-    #                     loop = False
-    #                     self.main_menu()
-    #                 if event.key == pygame.K_ESCAPE:
-    #                     loop = False
-    #                     self.play_game()
-    #             self.screen.fill(BLACK)
-    #             self.pause_sprite.draw(self.screen)
-    #             pygame.display.flip()
 
     def win(self):
         self.sound_player.play_victory_snd()

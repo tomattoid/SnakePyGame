@@ -81,7 +81,7 @@ class Play(pygame.sprite.Sprite):
             self.image.set_alpha(255)
 
 
-class Leaderboard(pygame.sprite.Sprite):
+class Leaderboard_ui(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(leaderboard_img)

@@ -1,4 +1,3 @@
-import json
 import pygame
 from config import WIDTH, HEIGHT, WHITE, GREY
 
@@ -23,6 +22,7 @@ class SnakeElement(pygame.sprite.Sprite):
             "speed_x": self.speed_x,
             "speed_y": self.speed_y
         }
+
 
 class Snake:
     def __init__(self):
