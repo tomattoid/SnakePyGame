@@ -2,6 +2,7 @@ import pygame
 from enum_ceate import MenuItem, FontSize
 from leaderboard import Leaderboard
 from server_req import ServerReq
+from settings import Settings
 import user_input
 from pygame.locals import KEYDOWN
 from config import WIDTH, HEIGHT, FPS, BLACK, GAME_SPEED
@@ -9,7 +10,7 @@ from config import RED
 from snake import Snake
 from apple import Apple
 from ui import (Win, GameOver, Start, Pause, Menu, Play,
-                Leaderboard_ui, Settings, Quit)
+                Leaderboard_ui, Settings_ui, Quit)
 from sound import SoundPlayer
 
 
@@ -32,7 +33,7 @@ class Game():
         self.menu = Menu()
         self.play = Play()
         self.leaderboard_ui = Leaderboard_ui()
-        self.settings = Settings()
+        self.settings_ui = Settings_ui()
         self.quit = Quit()
         self.game_sprites = pygame.sprite.Group()
         self.start_sprites = pygame.sprite.Group()
@@ -48,7 +49,7 @@ class Game():
         self.pause_sprite.add(self.pause)
         self.start_sprites.add(self.start)
         self.main_menu_list = [self.menu, self.play,
-                               self.leaderboard_ui, self.settings,
+                               self.leaderboard_ui, self.settings_ui,
                                self.quit]
         self.main_menu_sprites.add(self.main_menu_list)
 
@@ -94,7 +95,9 @@ class Game():
                         if selected == MenuItem.LEADERBOARD:
                             self.leaders.show()
                         if selected == MenuItem.SETTINGS:
-                            print('settings')
+                            self.settings = Settings(self.screen,
+                                                     self.sound_player)
+                            self.settings.SettingMenu()
                         if selected == MenuItem.QUIT:
                             pygame.quit()
                         loop = True

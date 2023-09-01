@@ -16,3 +16,9 @@ class FontSize(enum.IntEnum):
     SMALL = 10
     MEDIUM = 15
     LARGE = 20
+
+
+class SettnigMenuItem(enum.IntEnum):
+    SOUND = 0
+    MUSIC_VOLUME = 1
+    BACK = 2
